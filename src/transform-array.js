@@ -1,52 +1,38 @@
+'use strict';
 // const CustomError = require("../extensions/custom-error");
 
 // module.exports = function transform(arr) {
-//   const resultArr =[];
+//   let itemPos =-1;
 //    if (Array.isArray(arr)){
-//      for(let i=0; i<arr.length;i++){      
-//        if (arr[i] == '--discard-next'){
-//         let nextItem = arr[i+1];
-//         if(nextItem == '--discard-next' || nextItem == '--discard-prev' || nextItem == '--double-prev' || nextItem == '--double-next'){
-//           continue;
+//       const arrDel= ['--double-next','--double-prev','--discard-prev','--discard-next'];
+//       const itemArray = arr.filter((item)=>{
+//           return !arrDel.includes(item);
+//       });
+
+//       for(let i=0; i<arr.length;i++){
+//         if(arr[i] == '--double-next'){
+//           itemPos = itemArray.indexOf(arr[i+1]);          
+//           let res = (itemPos != -1) ? itemArray.splice(itemPos,0,arr[i+1]) : false;            
 //         }
-//         else{
-//           arr.splice([i+1],1);
-//         } 
-//        }
-//        else if (arr[i] == '--discard-prev'){
-//         let prevItem = arr[i-1];
-//         if(prevItem == '--discard-next' || prevItem == '--discard-prev' || prevItem == '--double-prev' || prevItem == '--double-next'){
-//           continue;
+//         else if(arr[i] == '--double-prev'){
+//           itemPos = itemArray.indexOf(arr[i-1]);          
+//           let res = (itemPos != -1) ? itemArray.splice(itemPos,0,arr[i-1]) : false;
+//          }
+//         else if(arr[i] == '--discard-prev'){
+//           itemPos = itemArray.indexOf(arr[i-1]);          
+//           let res = (itemPos != -1) ? itemArray.splice(itemPos,1) : false;
+ 
 //         }
-//         else{
-//           arr.splice([i-1],1);
+//         else if(arr[i] == '--discard-next'){
+//           itemPos = itemArray.indexOf(arr[i+1]);          
+//           let res = (itemPos != -1) ? itemArray.splice(itemPos,1) : false;
 //         }     
-//        }
-//        else if (arr[i] == '--double-next'){
-//         let nextItem = arr[i+1]; 
-//         if(nextItem == '--discard-next' || nextItem == '--discard-prev' || nextItem == '--double-prev' || nextItem == '--double-next'){
-//           continue;
-//         }else{
-//           resultArr.push(arr[i+1]);
-//         }          
-//        }
-//        else if (arr[i] == '--double-prev'){
-//           let prevItem = arr[i-1];
-//           if (prevItem == '--discard-next' || prevItem == '--discard-prev' || prevItem == '--double-prev' || prevItem == '--double-next'){
-//             continue;
-//           }
-//           else{
-//             resultArr.push(prevItem);
-//           }
-//        }
-//        else{
-//          resultArr.push(arr[i]);
-//        }       
 //      }
-//    }else{
+//      return itemArray; 
+//    }
+//    else{
 //      throw Error;
 //    }
-//    return resultArr; 
 // };
 
 
@@ -59,38 +45,127 @@
 
 
 function transform(arr) {
-  const resultArr =[];
+  let itemPos =[];
    if (Array.isArray(arr)){
-     for(let i=0; i<arr.length;i++){
-       if(arr[i] == '--double-next'){
-        resultArr.push(arr[i+1]);
-        resultArr.push(arr[i+1]);
-       }else if(arr[i] == '--discard-prev'){
-        if(arr[i-2] == '--discard-next'){
-          continue;
-        }else{
-          resultArr.pop();
-        }         
-       }else if(arr[i] == '--discard-next'){
-        i++;        
-      }else if(arr[i] == '--double-prev'){
-        if(arr[i-2] == '--discard-next' || arr[i-2] == '--double-next'){
-          continue;
-        }else{
-          resultArr.push(arr[i-1]);
-          resultArr.push(arr[i-1]);
-        }
-      }
-       else{
-        resultArr.push(arr[i]);
-       }      
+      const arrDel= ['--double-next','--double-prev','--discard-prev','--discard-next'];
+      const itemArray = arr.filter((item)=>{
+          return !arrDel.includes(item);
+      });    
+       
 
+      for(let i=0; i<arr.length;i++){
+        if(arr[i] == '--double-next'){
+          // itemPos = itemArray.indexOf(arr[i+1]); 
+          const itemPos = getAllIndexes(itemArray, arr[i+1]);         
+          let res = (itemPos[0] != -1) ? itemArray.splice(itemPos[0],0,arr[i+1]) : false;
+          itemPos.splice(itemPos[0],1);            
+        }
+        else if(arr[i] == '--double-prev'){
+          // itemPos = itemArray.indexOf(arr[i-1]);
+          const itemPos = getAllIndexes(itemArray, arr[i-1]);           
+          let res = (itemPos[0] != -1) ? itemArray.splice(itemPos[0],0,arr[i-1]) : false;
+          itemPos.splice(itemPos[0],1); 
+         }
+        else if(arr[i] == '--discard-prev'){
+          const itemPos = getAllIndexes(itemArray, arr[i-1]);
+          // itemPos = itemArray.indexOf(arr[i-1]);          
+          let res = (itemPos[0] != -1) ? itemArray.splice(itemPos[0],1) : false;
+          itemPos.splice(itemPos[0],1); 
+        }
+        else if(arr[i] == '--discard-next'){
+          const itemPos = getAllIndexes(itemArray, arr[i+1]);
+          // itemPos = itemArray.indexOf(arr[i+1]);          
+          let res = (itemPos[0] != -1) ? itemArray.splice(itemPos[0],1) : false;
+          itemPos.splice(itemPos[0],1);
+        }     
      }
-   }else{
+     return itemArray; 
+   }
+   else{
      throw Error;
    }
-   return resultArr; 
- };
+
+}
+
+function getAllIndexes(arr, val) {
+  let indexes = [], i;
+  for(i = 0; i < arr.length; i++){
+      if (arr[i] === val){
+          indexes.push(i);
+      }
+  }
+  if (indexes.length!=0){
+     return indexes;
+  }else{
+    indexes[0]=-1;
+     return indexes; 
+  }
+}
 
 
- console.log(transform([1, 2, 3, '--double-next', 1337, '--discard-prev', 4, 5]));
+
+
+
+
+ console.log(transform([ 
+  '--double-prev',
+  1,
+  '--discard-prev',
+  'GHI',
+  '--discard-next',
+  333,
+  '--discard-prev',
+  { '0': 'first', '1': 'second', length: 2 },
+  '--double-prev',
+  1,
+  '--double-prev',
+  'DEF',
+  { '0': 'first', '1': 'second', length: 2 },
+  { '0': 'first', '1': 'second', length: 2 },
+  1.233,
+  333,
+  'GHI',
+  '--discard-prev'
+  ]));
+
+
+
+// [ '-1': '--double-prev' ]
+// !!!!!
+// []
+
+
+// [
+//   '--double-prev',
+//   1,
+//   '--discard-prev',
+//   'GHI',
+//   '--discard-next',
+//   333,
+//   '--discard-prev',
+//   { '0': 'first', '1': 'second', length: 2 },
+//   '--double-prev',
+//   1,
+//   '--double-prev',
+//   'DEF',
+//   { '0': 'first', '1': 'second', length: 2 },
+//   { '0': 'first', '1': 'second', length: 2 },
+//   1.233,
+//   333,
+//   'GHI',
+//   '--discard-prev'
+// ]
+// !!!!!
+// [
+//   'GHI',
+//   { '0': 'first', '1': 'second', length: 2 },
+//   { '0': 'first', '1': 'second', length: 2 },
+//   1,
+//   1,
+//   'DEF',
+//   { '0': 'first', '1': 'second', length: 2 },
+//   { '0': 'first', '1': 'second', length: 2 },
+//   1.233,
+//   333
+// ]
+
